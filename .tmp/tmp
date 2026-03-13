@@ -1,0 +1,191 @@
+# 静态导航页整合多项目部署开发文档
+## 一、文档概述
+### 1. 开发目标
+搭建一个统一的静态导航页项目（命名为项目A），整合多个子项目的打包产物（dist文件夹），仅部署项目A即可实现外网访问导航页，并通过导航页跳转至各子项目的首页，无需单独部署每个子项目。
+
+### 2. 核心优势
+- 单项目部署：仅需维护/部署项目A，无需单独部署各子项目，降低维护成本；
+- 静态化部署：全程无服务器依赖，基于Gitee Pages/Vercel等免费静态托管服务，零成本、高安全；
+- 外网可访问：导航页及所有子项目均通过统一域名/地址对外访问，路径统一易管理；
+- 低成本适配：适配低访问量场景，免费托管额度完全满足需求。
+
+## 二、前置准备
+### 1. 环境要求
+- 各子项目已完成打包，生成dist文件夹（Vue/React/Vite/Webpack等框架均可）；
+- 静态托管平台账号（推荐Gitee/Vercel，免费且无需备案）；
+- 基础的HTML/CSS编辑能力（仅需修改导航页样式/跳转路径）。
+
+### 2. 资源准备
+- 各子项目打包后的dist文件夹；
+- 导航页基础代码（本文提供模板）。
+
+## 三、核心实现步骤
+### 步骤1：搭建项目A的目录结构
+#### 1.1 目录规范
+项目A根目录需按以下结构整理，子项目dist文件夹重命名为易识别的英文名称（避免中文/特殊字符）：
+```
+project-A/                  # 项目A根目录
+├── index.html              # 导航页核心文件（总入口）
+├── 404.html                # 可选，解决SPA刷新404问题
+├── vercel.json             # 可选，Vercel部署时配置路由
+├── project1/               # 子项目1的dist文件夹（重命名后）
+│   ├── index.html          # 子项目1首页
+│   ├── assets/             # 子项目1的CSS/JS/图片等资源
+│   └── ...                 # 子项目1其他打包产物
+├── project2/               # 子项目2的dist文件夹（重命名后）
+│   ├── index.html
+│   ├── assets/
+│   └── ...
+└── [其他子项目文件夹]      # 按上述规则添加更多子项目
+```
+
+#### 1.2 子项目dist处理规则
+- 直接复制子项目打包后的dist文件夹内所有文件至项目A的对应子文件夹（如project1）；
+- 子文件夹命名必须为英文/数字，禁止包含中文、空格、特殊字符（如`项目1`需改为`project1`）；
+- 确保每个子项目文件夹的根目录包含`index.html`（子项目首页）。
+
+### 步骤2：编写导航页核心代码（index.html）
+#### 2.1 基础模板（可直接复用）
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>项目导航页</title>
+  <style>
+    /* 基础样式，可自定义修改 */
+    .container {
+      max-width: 1200px;
+      margin: 50px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 0 20px;
+    }
+    .project-card {
+      padding: 30px 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      color: #333;
+    }
+    .project-card:hover {
+      background: #409eff;
+      color: white;
+      transform: translateY(-5px);
+    }
+    .project-card h3 {
+      margin: 0 0 10px;
+    }
+    .project-card p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 子项目1入口：相对路径指向子文件夹index.html -->
+    <a class="project-card" href="./project1/index.html" target="_blank">
+      <h3>项目1：H5活动页</h3>
+      <p>点击进入H5活动页面</p>
+    </a>
+    <!-- 子项目2入口：按实际子文件夹名称修改 -->
+    <a class="project-card" href="./project2/index.html" target="_blank">
+      <h3>项目2：数据可视化</h3>
+      <p>点击进入数据可视化页面</p>
+    </a>
+    <!-- 新增子项目：复制上述标签，修改href和文案即可 -->
+  </div>
+</body>
+</html>
+```
+
+#### 2.2 关键配置说明
+- 跳转路径：所有`href`需使用**相对路径**（如`./project1/index.html`），禁止使用绝对路径；
+- 新窗口打开：`target="_blank"`确保跳转后不关闭导航页，可根据需求移除；
+- 样式自定义：可修改`<style>`内的样式（如颜色、布局、卡片大小），不影响核心功能。
+
+### 步骤3：子项目路径适配（必做！解决资源加载失败）
+#### 3.1 问题原因
+子项目打包时若使用绝对路径（如`/assets/css/style.css`），跳转后会因路径错误导致样式/图片/JS加载失败。
+
+#### 3.2 适配方案（按子项目框架选择）
+| 子项目框架       | 配置文件       | 新增/修改配置                | 说明                     |
+|------------------|----------------|-----------------------------|--------------------------|
+| Vue2（Webpack）  | vue.config.js  | `publicPath: './'`          | 配置后重新打包           |
+| Vue3（Vite）     | vite.config.js | `base: './'`                | 配置后重新打包           |
+| React（Create React App） | package.json | `"homepage": "./"`          | 配置后重新打包           |
+| 纯HTML/CSS项目   | 无需配置       | 确保资源路径为相对路径（如`./img/logo.png`） | 检查所有资源引用路径     |
+
+### 步骤4：本地测试（验证路径正确性）
+1. 直接双击项目A根目录的`index.html`，打开导航页；
+2. 点击各子项目入口按钮，验证：
+   - 能否跳转到对应子项目首页；
+   - 子项目的样式、图片、JS是否正常加载；
+   - 子项目内部跳转（如有）是否正常。
+
+### 步骤5：部署项目A（唯一部署步骤）
+#### 5.1 推荐方案1：Gitee Pages部署（国内访问快）
+1. 登录Gitee，新建**公开仓库**（命名如`project-A`）；
+2. 上传项目A根目录的所有文件（index.html、project1、project2等）至仓库根目录；
+3. 进入仓库 → 顶部「服务」→「Gitee Pages」；
+4. 配置部署参数：
+   - 部署分支：master/main（默认）；
+   - 部署目录：`/`（根目录，必须！）；
+   - 勾选「强制HTTPS」；
+5. 点击「启动」，等待1-2分钟，生成外网访问地址（如`https://用户名.gitee.io/project-A/`）。
+
+#### 5.2 推荐方案2：Vercel部署（适配SPA刷新）
+1. 登录Vercel，关联GitHub/Gitee仓库（需将项目A上传至代码仓库）；
+2. 导入`project-A`仓库，Vercel自动识别静态项目，无需额外配置；
+3. 部署完成后生成外网访问地址（如`https://project-a.vercel.app/`）；
+4. （可选）解决SPA刷新404：在项目A根目录新增`vercel.json`，内容如下：
+   ```json
+   {
+     "rewrites": [
+       { "source": "/project1/(.*)", "destination": "/project1/index.html" },
+       { "source": "/project2/(.*)", "destination": "/project2/index.html" },
+       { "source": "/(.*)", "destination": "/index.html" }
+     ]
+   }
+   ```
+
+## 四、常见问题及解决方案
+| 问题现象                  | 原因分析                          | 解决方案                                                                 |
+|---------------------------|-----------------------------------|--------------------------------------------------------------------------|
+| 子项目样式/图片加载失败    | 子项目打包路径为绝对路径          | 按步骤3配置相对路径，重新打包子项目并替换project-A内的对应文件夹         |
+| SPA子项目刷新页面404       | 路由模式为history，无404兜底      | Gitee Pages：新增404.html（内容与index.html一致）；Vercel：配置vercel.json |
+| 导航页按钮跳转无反应       | 子文件夹命名错误/路径拼写错误     | 检查`href`路径与子文件夹名称是否一致（区分大小写）                       |
+| 外网访问提示403/禁止访问   | Gitee仓库为私有                   | 将仓库改为「公开」，重新部署Gitee Pages                                  |
+
+## 五、进阶优化（可选）
+### 1. 统一返回导航
+在各子项目的`index.html`头部添加返回按钮，方便用户回到导航页：
+```html
+<div style="position: fixed; top: 20px; left: 20px; z-index: 999;">
+  <a href="../index.html" style="padding: 8px 16px; background: #409eff; color: white; border-radius: 4px; text-decoration: none;">返回导航页</a>
+</div>
+```
+
+### 2. 资源压缩
+部署前压缩项目A内的图片、JS/CSS文件（如使用TinyPNG压缩图片），提升加载速度。
+
+### 3. 权限控制
+若需保护部分子项目，可结合Vercel的「Password Protection」功能，给项目A添加访问密码（仅Vercel部署支持）。
+
+## 六、核心规范与注意事项
+1. 路径规范：所有资源路径必须使用相对路径，禁止硬编码绝对路径；
+2. 命名规范：子文件夹、文件名禁止包含中文/空格/特殊字符；
+3. 安全规范：禁止在代码中硬编码密钥、敏感信息；
+4. 维护规范：新增/修改子项目时，仅需更新项目A内的对应子文件夹及导航页跳转链接，重新部署即可。
+
+## 七、总结
+1. 核心流程：搭建目录结构 → 编写导航页 → 子项目路径适配 → 本地测试 → 部署项目A；
+2. 关键要点：子项目必须配置相对路径、导航页使用相对跳转路径、仅部署项目A一个包；
+3. 交付物：项目A完整文件夹、外网访问地址、各子项目适配后的打包配置记录。

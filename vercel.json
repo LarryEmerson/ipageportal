@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/cmms/(.*)", "destination": "/cmms/index.html" },
+    { "source": "/github/(.*)", "destination": "/github/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

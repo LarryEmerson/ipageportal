@@ -1,0 +1,19 @@
+{
+    "version":  "3.0.95",
+    "versionDate":  "2026-03-13 10:39:08",
+    "appName":  "中药诊疗管理助手",
+    "description":  "中药诊疗管理助手，用于管理中药库存、开方、炮制等操作",
+    "debug":  {
+                  "dbManager":  0,
+                  "drugManager":  0,
+                  "sourceManager":  0,
+                  "prescriptionManager":  0,
+                  "diagnosisLogManager":  0,
+                  "stockInManager":  0,
+                  "stockOutManager":  0,
+                  "processingManager":  0,
+                  "purchaseManager":  0,
+                  "statsManager":  0,
+                  "backupManager":  0
+              }
+}
