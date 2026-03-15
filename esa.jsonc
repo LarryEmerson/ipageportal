@@ -1,0 +1,10 @@
+// 场景1：静态文件在根目录（IPagePortal）
+{
+  "name": "ipageportal",
+  "installCommand": "echo 'skip install'", // 跳过安装依赖
+  "buildCommand": "echo 'skip build'",     // 跳过构建
+  "assets": {
+    "directory": "./",                     // 部署根目录文件
+    "notFoundStrategy": "singlePageApplication" // SPA 回退
+  }
+}
