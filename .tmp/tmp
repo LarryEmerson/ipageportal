@@ -1,3 +1,8 @@
+"redirects": [
+    { "source": "/shl", "destination": "/shl/sh", "permanent": false },
+    { "source": "/shl/", "destination": "/shl/sh", "permanent": false }
+  ],
+
 # 静态导航页整合多项目部署开发文档
 ## 一、文档概述
 ### 1. 开发目标

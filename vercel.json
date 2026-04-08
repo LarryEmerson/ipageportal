@@ -1,13 +1,7 @@
 {
-  "redirects": [
-    { "source": "/shl", "destination": "/shl/fang", "permanent": false },
-    { "source": "/shl/", "destination": "/shl/fang", "permanent": false }
-  ],
   "rewrites": [
-    { "source": "/shl/:path*", "destination": "/shl/index.html" },
     { "source": "/math/(.*)", "destination": "/math/index.html" },
     { "source": "/cmms/(.*)", "destination": "/cmms/index.html" },
-    { "source": "/es/(.*)", "destination": "/es/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
